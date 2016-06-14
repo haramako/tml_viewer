@@ -11,6 +11,7 @@ obj/
 *.userprefs
 *.suo
 *.sln
+*.pdb
 
 # Mac
 __MACOSX
@@ -22,3 +23,5 @@ iOS_Xcode
 /UnityVS.*
 
 [#]*
+tmlviewer.exe
+tmlviewer_Data
