@@ -1,0 +1,24 @@
+# Unity 
+Library/
+Temp/
+obj/
+*.pidb
+*.csproj
+*.unityproj
+*.booproj
+*.svd
+*.user
+*.userprefs
+*.suo
+*.sln
+
+# Mac
+__MACOSX
+*.DS_Store
+iOS_Xcode
+/*.apk
+
+# UnityVS
+/UnityVS.*
+
+[#]*
