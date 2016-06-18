@@ -277,3 +277,140 @@ namespace Tml {
     }
 }
 
+#if !USE_SYSTEM_XML
+namespace Tml.XmlPolyfill {
+    public partial class XmlReader : IXmlLineInfo {
+        static CharType[] CharTable = {
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.Space, // "\t"
+            CharType.Space, // "\n"
+            CharType.None,
+            CharType.None,
+            CharType.Space, // "\r"
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.Space, // " "
+            CharType.None,
+            CharType.Quote, // "\""
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.Quote, // "'"
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.Separator, // "-"
+            CharType.None,
+            CharType.Close, // "/"
+            CharType.Number, // "0"
+            CharType.Number, // "1"
+            CharType.Number, // "2"
+            CharType.Number, // "3"
+            CharType.Number, // "4"
+            CharType.Number, // "5"
+            CharType.Number, // "6"
+            CharType.Number, // "7"
+            CharType.Number, // "8"
+            CharType.Number, // "9"
+            CharType.None,
+            CharType.None,
+            CharType.Open, // "<"
+            CharType.None,
+            CharType.Close, // ">"
+            CharType.None,
+            CharType.None,
+            CharType.Alphabet, // "A"
+            CharType.Alphabet, // "B"
+            CharType.Alphabet, // "C"
+            CharType.Alphabet, // "D"
+            CharType.Alphabet, // "E"
+            CharType.Alphabet, // "F"
+            CharType.Alphabet, // "G"
+            CharType.Alphabet, // "H"
+            CharType.Alphabet, // "I"
+            CharType.Alphabet, // "J"
+            CharType.Alphabet, // "K"
+            CharType.Alphabet, // "L"
+            CharType.Alphabet, // "M"
+            CharType.Alphabet, // "N"
+            CharType.Alphabet, // "O"
+            CharType.Alphabet, // "P"
+            CharType.Alphabet, // "Q"
+            CharType.Alphabet, // "R"
+            CharType.Alphabet, // "S"
+            CharType.Alphabet, // "T"
+            CharType.Alphabet, // "U"
+            CharType.Alphabet, // "V"
+            CharType.Alphabet, // "W"
+            CharType.Alphabet, // "X"
+            CharType.Alphabet, // "Y"
+            CharType.Alphabet, // "Z"
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.Separator, // "_"
+            CharType.None,
+            CharType.Alphabet, // "a"
+            CharType.Alphabet, // "b"
+            CharType.Alphabet, // "c"
+            CharType.Alphabet, // "d"
+            CharType.Alphabet, // "e"
+            CharType.Alphabet, // "f"
+            CharType.Alphabet, // "g"
+            CharType.Alphabet, // "h"
+            CharType.Alphabet, // "i"
+            CharType.Alphabet, // "j"
+            CharType.Alphabet, // "k"
+            CharType.Alphabet, // "l"
+            CharType.Alphabet, // "m"
+            CharType.Alphabet, // "n"
+            CharType.Alphabet, // "o"
+            CharType.Alphabet, // "p"
+            CharType.Alphabet, // "q"
+            CharType.Alphabet, // "r"
+            CharType.Alphabet, // "s"
+            CharType.Alphabet, // "t"
+            CharType.Alphabet, // "u"
+            CharType.Alphabet, // "v"
+            CharType.Alphabet, // "w"
+            CharType.Alphabet, // "x"
+            CharType.Alphabet, // "y"
+            CharType.Alphabet, // "z"
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+            CharType.None,
+        };
+    }
+}
+#endif
+

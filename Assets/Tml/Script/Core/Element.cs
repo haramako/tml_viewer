@@ -3,7 +3,11 @@ using UnityEngine;
 #endif
 using System;
 using System.Collections.Generic;
+#if USE_SYSTEM_XML
 using System.Xml;
+#else
+using Tml.XmlPolyfill;
+#endif
 using System.IO;
 using System.Text;
 using System.Reflection;
@@ -11,35 +15,6 @@ using System.Linq;
 
 namespace Tml
 {
-
-#if !UNITY
-    public class Logger
-    {
-		public static bool Enable = false;
-		public static bool StopOnException = true;
-
-        public static void Log(object text)
-        {
-			if( Enable ) Console.WriteLine(text.ToString());
-        }
-
-		public static void LogWarning(object text){
-			if( Enable ) Console.WriteLine(text.ToString());
-		}
-
-		public static void LogError(object text){
-			if( Enable ) Console.WriteLine(text.ToString());
-		}
-
-		public static void LogException(Exception ex){
-			if (StopOnException) {
-				throw ex;
-			} else {
-				Console.WriteLine (ex.ToString ());
-			}
-		}
-    }
-#endif
 
     public partial class Document: BlockElement
     {

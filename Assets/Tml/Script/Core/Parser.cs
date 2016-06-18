@@ -3,17 +3,22 @@ using System.IO;
 using System.Text;
 using System.Collections.Generic;
 using System.Reflection;
+#if USE_SYSTEM_XML
 using System.Xml;
+#else
+using Tml.XmlPolyfill;
+#endif
 
 // TODO: &nbsp; などのエンティティに対応
 // TODO: エラーに寛容に
 // TODO: styleのwidth,height
 // TODO: float: left or right
 // TODO: background-repeat: simple slice tile
-// TODO: background-color: NGUI
-// TODO: 複数classに対応
+// TODO: background-color for NGUI
 // TODO: Styleクラス継承
 // TODO: タグ定義
+// TODO: inline style
+// TODO: <link ref=style ...>
 
 namespace Tml
 {
@@ -120,12 +125,12 @@ namespace Tml
 						if (reader_.Name == "style") {
 							reader_.Read ();
 							if (reader_.NodeType != XmlNodeType.Text) {
-								throw new Exception ("must be text");
+								throw new InnerError ("must be text");
 							}
 							styleParser.ParseStyleSheet (root.StyleSheet, reader_.Value);
 							reader_.Read ();
 							if (reader_.NodeType != XmlNodeType.EndElement) {
-								throw new Exception ("must be close tag");
+								throw new InnerError ("must be close tag");
 							}
 						} else {
 
@@ -160,7 +165,7 @@ namespace Tml
 					if (errors_ == null) errors_ = new List<string> ();
 					errors_.Add (filename_ + ":" + lineInfo.LineNumber + ":" + lineInfo.LinePosition + " " + ex.Message);
 					throw new ParserException (ex.Message, filename_, lineInfo.LineNumber, lineInfo.LinePosition);
-				}
+				} 
 			}
 
 			// Logger.Log(root.Dump());

@@ -3,15 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-#if UNITY_5
-// StringBuilder.Clear()のpolyfill
-public static class StringBuilderExtension {
-	public static void Clear(this StringBuilder self){
-		self.Remove(0, self.Length);
-	}
-}
-#endif
-
 namespace Tml
 {
 	public partial class StyleParser {
