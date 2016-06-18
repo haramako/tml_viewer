@@ -39,7 +39,7 @@ public class TmlViewerMain : MonoBehaviour {
 
 		UrlInputPanel.gameObject.SetActive (false);
 		Tml.Style.DefaultFontSize = 30;
-		Tml.Logger.Enable = true;
+		Tml.Logger.SetLogger (Debug.logger);
 		var homeUrl = PlayerPrefs.GetString ("HomeUrl");
 		if (!string.IsNullOrEmpty (homeUrl)) {
 			Url = homeUrl;
