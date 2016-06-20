@@ -5,6 +5,7 @@ public class TmlView : MonoBehaviour {
 	public class EventInfo
 	{
 		public Tml.Element Element;
+		public Tml.Element Fragment;
 		public string Href;
 	}
 	public UIWidget Container;
@@ -32,10 +33,15 @@ public class TmlView : MonoBehaviour {
 		}
 
 		source_ = val;
-		Document = Tml.Parser.Default.Parse (source_);
-		var w = Container.GetComponent<UIWidget> ();
-		Document.Width = Document.LayoutedWidth = w.width;
-		Document.Height = Document.LayoutedHeight = w.height;
+		try {
+			Document = Tml.Parser.Default.Parse (source_);
+		}catch(Tml.ParserException ex){
+			Tml.Logger.LogException (ex);
+			return;
+		}
+		Document.Width = Document.LayoutedWidth = Container.width;
+		Document.Height = Document.LayoutedHeight = 0;
+
 		new Tml.Layouter (Document).Reflow ();
 
 		redrawParam_.Container = Container.gameObject;
@@ -44,6 +50,9 @@ public class TmlView : MonoBehaviour {
 		redrawParam_.Depth = 100;
 
 		Document.Redraw (redrawParam_);
+
+		Container.width = Document.LayoutedWidth;
+		Container.height = Document.LayoutedHeight;
 	}
 
 	public UIAtlas GetSpriteAtlas(string spriteName){

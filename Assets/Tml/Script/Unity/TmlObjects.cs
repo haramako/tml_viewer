@@ -120,7 +120,7 @@ namespace Tml {
 				labelObj.AddComponent<BoxCollider> ();
 				var button = labelObj.AddComponent<UIButton> ();
 				button.onClick.Add (new EventDelegate(() => {
-					p.View.OnClickElement(new TmlView.EventInfo(){ Element = this.Parent, Href=((A)StyleElement).Href });
+					p.View.OnClickElement(new TmlView.EventInfo(){ Element = this.Parent, Fragment = this, Href=((A)StyleElement).Href });
 				}));
 				label_.ResizeCollider ();
 			}
