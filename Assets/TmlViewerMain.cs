@@ -5,12 +5,12 @@ using System.Collections.Generic;
 using System;
 
 public class TmlViewerMain : MonoBehaviour, ILogHandler {
-	public UILabel UrlLabel;
+	public Text UrlLabel;
 	public TmlView View;
 	public string Url;
-	public UIScrollView ScrollView;
+	public ScrollRect ScrollView;
 	public GameObject ClickEffect;
-	public UIPanel TopPanel;
+	public RectTransform TopPanel;
 
 	public Image UrlInputPanel;
 	public InputField UrlInputField;
@@ -18,6 +18,7 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 	List<string> history_ = new List<string>();
 
 	static Tml.Layouter.CharInfo getCharacterCount(Tml.Element e, string text, int startPos, int fontSize, int width){
+		/*
 		NGUIText.dynamicFont = UILabel.GetDefaultFont ();
 		NGUIText.fontSize = fontSize;
 		NGUIText.finalSize = fontSize;
@@ -35,11 +36,12 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 			use += w;
 			prev = text [i];
 		}
-		return new Tml.Layouter.CharInfo{ CharacterCount = text.Length - startPos, TextWidth = (int)use };
+		*/
+		return new Tml.Layouter.CharInfo{ CharacterCount = text.Length, TextWidth = width };
 	}
 		
 	public void Start(){
-		ClickEffect.SetActive (false);
+		//ClickEffect.SetActive (false);
 
 		Tml.Layouter.GetCharacterCountCallback = getCharacterCount;
 
@@ -87,14 +89,14 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 		View.Source = defaultStyle + www.text;
 
 		// スクロール領域の調整
-		var w = View.GetComponent<UIWidget> ();
-		var col = View.GetComponent<BoxCollider> ();
-		col.center = new Vector3 (w.width / 2, - w.height / 2);
-		col.size = new Vector3 (w.width, w.height);
+		//var w = View.GetComponent<UIWidget> ();
+		//var col = View.GetComponent<BoxCollider> ();
+		//col.center = new Vector3 (w.width / 2, - w.height / 2);
+		//col.size = new Vector3 (w.width, w.height);
 
 		yield return null; // 1フレーム待つ
 
-		ScrollView.ResetPosition ();
+		//ScrollView.ResetPosition ();
 	}
 
 	public void GotoUrl(string url){
@@ -108,6 +110,7 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 			return;
 		}
 
+		/*
 		var effectObj = Instantiate (ClickEffect);
 		var effectSprite = effectObj.GetComponent<UISprite> ();
 
@@ -120,6 +123,7 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 		TweenScale.Begin (effectObj, 0.2f, new Vector3 (2, 2));
 		TweenAlpha.Begin (effectObj, 0.2f, 0);
 		GameObject.Destroy (effectObj, 0.2f);
+		*/
 
 	}
 

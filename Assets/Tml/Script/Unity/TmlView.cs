@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class TmlView : MonoBehaviour {
@@ -8,10 +9,11 @@ public class TmlView : MonoBehaviour {
 		public Tml.Element Fragment;
 		public string Href;
 	}
-	public UIWidget Container;
+	public RectTransform Container;
+	public Font DefaultFont;
 
 	public Tml.Document Document;
-	public UIAtlas[] Atlases;
+	public Sprite[] Atlases;
 
 	public EventInfo ActiveEvent { get; private set; }
 
@@ -27,9 +29,7 @@ public class TmlView : MonoBehaviour {
 
 	void setSource(string val){
 		if (Document != null) {
-			if (Document.obj_ != null) {
-				GameObject.DestroyImmediate (Document.obj_);
-			}
+			GameObject.DestroyImmediate (Document.obj_.gameObject);
 		}
 
 		source_ = val;
@@ -39,26 +39,25 @@ public class TmlView : MonoBehaviour {
 			Tml.Logger.LogException (ex);
 			return;
 		}
-		Document.Width = Document.LayoutedWidth = Container.width;
+		Document.Width = Document.LayoutedWidth = (int)Container.rect.width;
 		Document.Height = Document.LayoutedHeight = 0;
 
 		new Tml.Layouter (Document).Reflow ();
 
-		redrawParam_.Container = Container.gameObject;
+		redrawParam_.Container = Container;
 		redrawParam_.Document = Document;
 		redrawParam_.View = this;
 		redrawParam_.Depth = 100;
 
 		Document.Redraw (redrawParam_);
 
-		Container.width = Document.LayoutedWidth;
-		Container.height = Document.LayoutedHeight;
+		Container.SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, Document.LayoutedWidth);
+		Container.SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, Document.LayoutedHeight);
 	}
 
-	public UIAtlas GetSpriteAtlas(string spriteName){
+	public Sprite GetSpriteAtlas(string spriteName){
 		for (int i = 0; i < Atlases.Length; i++) {
-			var sprite = Atlases [i].GetSprite (spriteName);
-			if (sprite != null) {
+			if (Atlases [i].name == spriteName) {
 				return Atlases [i];
 			}
 		}
