@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System;
 
 public class TmlViewerMain : MonoBehaviour, ILogHandler {
-	public Text UrlLabel;
+	public InputField UrlInput;
 	public TmlView View;
 	public string Url;
 	public ScrollRect ScrollView;
@@ -17,33 +17,10 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 
 	List<string> history_ = new List<string>();
 
-	static Tml.Layouter.CharInfo getCharacterCount(Tml.Element e, string text, int startPos, int fontSize, int width){
-		/*
-		NGUIText.dynamicFont = UILabel.GetDefaultFont ();
-		NGUIText.fontSize = fontSize;
-		NGUIText.finalSize = fontSize;
-		NGUIText.Update (true);
-		NGUIText.dynamicFont.RequestCharactersInTexture(text, NGUIText.finalSize, NGUIText.fontStyle);
-
-		int prev = 0;
-		float rest = width;
-		float use = 0;
-		for (int i = startPos; i < text.Length; i++) {
-			var w = NGUIText.GetGlyphWidth (text [i], prev);
-			if (use + w >= rest && i > startPos) {
-				return new Tml.Layouter.CharInfo{ CharacterCount = i - startPos, TextWidth = (int)use };
-			}
-			use += w;
-			prev = text [i];
-		}
-		*/
-		return new Tml.Layouter.CharInfo{ CharacterCount = text.Length, TextWidth = width };
-	}
-		
 	public void Start(){
 		//ClickEffect.SetActive (false);
 
-		Tml.Layouter.GetCharacterCountCallback = getCharacterCount;
+		Tml.Layouter.GetCharacterCountCallback = View.GetCharacterCount;
 
 		UrlInputPanel.gameObject.SetActive (false);
 		Tml.Style.DefaultFontSize = 30;
@@ -53,6 +30,7 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 		if (!string.IsNullOrEmpty (homeUrl)) {
 			Url = homeUrl;
 		}
+		View.BaseUrl = new Uri (homeUrl);
 		GotoUrl (Url);
 	}
 
@@ -61,7 +39,7 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 		var newUri = new Uri (baseUri, url);
 
 		Url = newUri.ToString();
-		UrlLabel.text = Url;
+		UrlInput.text = Url;
 		LogText.text = "";
 
 		StartCoroutine (OpenUrlCoroutine ());

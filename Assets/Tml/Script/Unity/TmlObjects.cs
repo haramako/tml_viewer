@@ -38,7 +38,6 @@ namespace Tml {
 				break;
 			case WidgetMode.Sprite:
 				widget_ = obj_.gameObject.AddComponent<Image> ();
-				((Image)widget_).color = Color.black;
 				break;
 			}
 		}
@@ -50,7 +49,6 @@ namespace Tml {
 			if (obj_ == null) {
 				obj_ = go.AddComponent<RectTransform> ();
 			}
-			obj_.localPosition = Vector3.zero;
 
 			if (widgetMode_ == WidgetMode.None) {
 				if (!string.IsNullOrEmpty (Style.BackgroundImage)) {
@@ -69,12 +67,14 @@ namespace Tml {
 				//obj_.depth = p.Depth;
 				if (widgetMode_ == WidgetMode.Sprite) {
 					var sprite = (Image)widget_;
-					sprite.sprite = p.View.GetSpriteAtlas (Style.BackgroundImage);
-					sprite.type = Image.Type.Sliced;
+					p.View.GetSprite (Style.BackgroundImage).Done (spr => {
+						sprite.sprite = spr;
+						sprite.type = Image.Type.Sliced;
+					});
 				}
 			}
 
-			obj_.transform.localPosition = new Vector3 (LayoutedX, -LayoutedY);
+			obj_.localPosition = new Vector3 (LayoutedX, -LayoutedY);
 
 			var containerBackup = p.Container;
 			p.Container = obj_;
@@ -94,8 +94,10 @@ namespace Tml {
 			base.Redraw (p);
 
 			var sprite = (Image)widget_;
-			sprite.sprite = p.View.GetSpriteAtlas (Src);
-			sprite.type = Image.Type.Sliced;
+			p.View.GetSprite (Src).Done (spr => {
+				sprite.sprite = spr;
+				sprite.type = Image.Type.Sliced;
+			});
 		}
 	}
 
@@ -106,9 +108,7 @@ namespace Tml {
 		public override void Redraw(RedrawParam p){
 			base.Redraw (p);
 
-			var labelObj = new GameObject("TmlText");
-			labelObj.transform.SetParent (obj_, false);
-			label_ = labelObj.AddComponent<UIText> ();
+			label_ = obj_.gameObject.AddComponent<UIText> ();
 			//label_.pivot = UIWidget.Pivot.TopLeft;
 			var text = Value;
 			if (StyleElement.Style.TextDecoration == "underline") {
@@ -119,17 +119,18 @@ namespace Tml {
 			}
 			label_.text = text;
 			label_.fontSize = StyleElement.ActualFontSize();
-			label_.alignment = TextAnchor.UpperLeft;
+			label_.alignment = TextAnchor.LowerLeft;
 			label_.font = p.View.DefaultFont;
+			label_.verticalOverflow = VerticalWrapMode.Overflow;
 			//label_.depth = p.Depth + 1;
-			var rt = labelObj.GetComponent<RectTransform>();
+			var rt = obj_.GetComponent<RectTransform>();
 			rt.pivot = new Vector2 (0, 1);
 			rt.SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, LayoutedHeight);
 			rt.SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, LayoutedWidth * 1.1f);
 			//label_.SetRect (0, -LayoutedHeight, LayoutedWidth * 1.1f /* 幅が足りないことがあるので */, LayoutedHeight);
 
 			if (StyleElement.Tag == "a") {
-				var button = labelObj.AddComponent<Button> ();
+				var button = obj_.gameObject.AddComponent<Button> ();
 				button.onClick.AddListener (this.OnClick);
 				view_ = p.View;
 			}
