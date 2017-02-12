@@ -166,9 +166,7 @@ namespace Tml
 				fragment.LayoutedWidth = charInfo.TextWidth;
 				addInlineFragment (fragment);
 				cur += n;
-				if (cur < str.Length) {
-					newlineInline ();
-				} else {
+				if (cur >= str.Length) {
 					break;
 				}
 			}
