@@ -9,7 +9,6 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 	public TmlView View;
 	public string Url;
 	public ScrollRect ScrollView;
-	public GameObject ClickEffect;
 	public RectTransform TopPanel;
 
 	public Image UrlInputPanel;
@@ -18,19 +17,18 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 	List<string> history_ = new List<string>();
 
 	public void Start(){
-		//ClickEffect.SetActive (false);
 
-		Tml.Layouter.GetCharacterCountCallback = View.GetCharacterCount;
+        Tml.Layouter.GetCharacterCountCallback = View.GetCharacterCount;
 
 		UrlInputPanel.gameObject.SetActive (false);
 		Tml.Style.DefaultFontSize = 30;
 		Tml.Logger.SetLogger (new Logger (this));
 
 		var homeUrl = PlayerPrefs.GetString ("HomeUrl");
-		if (!string.IsNullOrEmpty (homeUrl)) {
+        if (!string.IsNullOrEmpty (homeUrl)) {
 			Url = homeUrl;
 		}
-		View.BaseUrl = new Uri (homeUrl);
+        View.BaseUrl = new Uri (homeUrl);
 		GotoUrl (Url);
 	}
 
@@ -47,7 +45,7 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 
 	IEnumerator OpenUrlCoroutine(){
 		var homeUrl = PlayerPrefs.GetString ("HomeUrl");
-		var defaultStyleUrl = new Uri(new Uri (homeUrl), "./default.tml");
+        var defaultStyleUrl = new Uri(new Uri (homeUrl), "./default.tml");
 
 		var defaultStyle = "";
 		var www0 = new WWW (defaultStyleUrl.ToString());
@@ -58,23 +56,18 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 
 		var www = new WWW (Url);
 		yield return www;
+        Debug.Log(Url);
 
 		if (!string.IsNullOrEmpty (www.error)) {
-			Debug.Log ("error");
+			Debug.Log ("error:" + www.error);
 			yield break;
 		}
 
 		View.Source = defaultStyle + www.text;
 
-		// スクロール領域の調整
-		//var w = View.GetComponent<UIWidget> ();
-		//var col = View.GetComponent<BoxCollider> ();
-		//col.center = new Vector3 (w.width / 2, - w.height / 2);
-		//col.size = new Vector3 (w.width, w.height);
-
 		yield return null; // 1フレーム待つ
 
-		//ScrollView.ResetPosition ();
+        ScrollView.verticalNormalizedPosition = 1.0f;
 	}
 
 	public void GotoUrl(string url){
@@ -82,42 +75,18 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 		OpenUrl (url);
 	}
 
-	// クリックした時のエフェクトを作成する
-	public void CreateClickEffect(Tml.Element e){
-		if (e.obj_ == null) {
-			return;
-		}
-
-		/*
-		var effectObj = Instantiate (ClickEffect);
-		var effectSprite = effectObj.GetComponent<UISprite> ();
-
-		effectObj.SetActive (true);
-		effectObj.transform.SetParent (TopPanel.transform, false);
-		effectObj.transform.position = e.obj_.transform.TransformPoint (new Vector3 (e.LayoutedWidth / 2, -e.LayoutedHeight / 2));
-		effectSprite.width = e.LayoutedWidth;
-		effectSprite.height = e.LayoutedHeight;
-
-		TweenScale.Begin (effectObj, 0.2f, new Vector3 (2, 2));
-		TweenAlpha.Begin (effectObj, 0.2f, 0);
-		GameObject.Destroy (effectObj, 0.2f);
-		*/
-
-	}
-
 	// log handler
 
 	public void LogFormat (LogType logType, UnityEngine.Object context, string format, params object[] args)
 	{
 		LogText.text += string.Format (format, args) + "\n";
-		Debug.logger.LogFormat (logType, context, format, args);
+		Debug.unityLogger.LogFormat (logType, context, format, args);
 	}
 
 	public void LogException (Exception exception, UnityEngine.Object context)
 	{
-		Debug.Log ("hoge");
 		LogText.text += exception.Message + "\n";
-		Debug.logger.LogException (exception, context);
+		Debug.unityLogger.LogException (exception, context);
 	}
 
 	public void OnBackButtonClick(){
@@ -135,7 +104,7 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 	}
 
 	public void OnUrlLabelClick(){
-		UrlInputPanel.gameObject.SetActive (true);
+		UrlInputPanel.gameObject.SetActive (!UrlInputPanel.gameObject.activeSelf);
 		UrlInputField.text = Url;
 	}
 
@@ -148,8 +117,6 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 
 	public IEnumerator OnTmlViewEventCoroutine(){
 		var e = View.ActiveEvent;
-
-		CreateClickEffect (e.Fragment);
 
 		yield return new WaitForSeconds (0.2f);
 

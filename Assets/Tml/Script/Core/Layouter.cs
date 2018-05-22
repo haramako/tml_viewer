@@ -10,7 +10,7 @@ namespace Tml
 			public int TextWidth;
 		}
 
-		#if UNITY_5
+		#if UNITY_2017_2_OR_NEWER
 		public delegate CharInfo GetCharacterCountCallbackType(Element e,string text,int startPos,int fontSize,int width);
 		public static GetCharacterCountCallbackType GetCharacterCountCallback;
 		#else
