@@ -134,7 +134,8 @@ namespace Tml {
 				button.onClick.AddListener (this.OnClick);
 				view_ = p.View;
 			}
-		}
+            obj_.localPosition = new Vector3(LayoutedX, -LayoutedY);
+        }
 
 		TmlView view_;
 
