@@ -4,6 +4,7 @@ using UnityEngine;
 #endif
 
 namespace Tml {
+
 	public partial class Style
 	{
         public int MarginLeft;

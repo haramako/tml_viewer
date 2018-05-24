@@ -48,6 +48,7 @@ namespace Tml
         public int Y;
         public int Width;
         public int Height;
+        public string Tips;
 
         public Element Parent;
         public List<Element> Children = new List<Element>();
@@ -108,6 +109,9 @@ namespace Tml
                     break;
                 case "height":
                     Height = int.Parse(value);
+                    break;
+                case "tips":
+                    Tips = value;
                     break;
                 default:
                     Logger.Log("unknown attribute " + name + "=" + value);

@@ -63,7 +63,7 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 			yield break;
 		}
 
-		View.Source = defaultStyle + www.text;
+		View.SetSource( www.text, defaultStyle);
 
 		yield return null; // 1フレーム待つ
 

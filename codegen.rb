@@ -14,6 +14,7 @@ using UnityEngine;
 #endif
 
 namespace Tml {
+
 	public partial class Style
 	{
         <%- style_fields.each do |f| -%>
@@ -225,6 +226,7 @@ style_field :string, 'text-align'
 
 style_field :string, 'background-image'
 style_field :string, 'background-color'
+
 
 puts ERB.new(TEMPLATE,nil,'-').run
 

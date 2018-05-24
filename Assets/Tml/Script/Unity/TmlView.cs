@@ -22,14 +22,12 @@ public class TmlView : MonoBehaviour {
 
 	public UnityEngine.Events.UnityEvent OnEvent;
 
-	Tml.Element.RedrawParam redrawParam_ = new Tml.Element.RedrawParam();
-
 	Canvas cachedCanvas_;
 
-	string source_;
-	public string Source { get { return source_; } set { setSource (value); } }
+	public string Source { get; private set; }
+    public string DefaultSource { get; private set; }
 
-	public Uri BaseUrl;
+    public Uri BaseUrl;
 	Dictionary<string,Sprite> sprites_ = new Dictionary<string,Sprite>();
 
 	public Tml.Layouter.CharInfo GetCharacterCount(Tml.Element e, string text, int startPos, int fontSize, int width){
@@ -65,35 +63,47 @@ public class TmlView : MonoBehaviour {
 		}
 	}
 
-	void setSource(string val){
+	public void SetSource(string src, string defaultSource)
+    {
 		if (Document != null) {
-			GameObject.DestroyImmediate (Document.obj_.gameObject);
+			GameObject.Destroy (Document.obj_.gameObject);
 		}
 
-		source_ = val;
-		try {
-			Document = Tml.Parser.Default.Parse (source_);
-		}catch(Tml.ParserException ex){
-			Tml.Logger.LogException (ex);
-			return;
-		}
-		Document.Width = Document.LayoutedWidth = (int)Container.rect.width;
-		Document.Height = Document.LayoutedHeight = 0;
-
-		new Tml.Layouter (Document).Reflow ();
-
-		redrawParam_.Container = Container;
-		redrawParam_.Document = Document;
-		redrawParam_.View = this;
-		redrawParam_.Depth = 100;
-
-		Document.Redraw (redrawParam_);
-
-		Container.SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, Document.LayoutedWidth);
-		Container.SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, Document.LayoutedHeight);
+        DefaultSource = defaultSource;
+		Source = src;
+        RenderToContainer(this, Container, src, DefaultSource);
 	}
 
-	public Sprite GetSpriteAtlas(string spriteName){
+    public static void RenderToContainer(TmlView view, RectTransform container, string src, string defaultSrc)
+    {
+        Tml.Document doc;
+        try
+        {
+            doc = Tml.Parser.Default.Parse(defaultSrc + src);
+        }
+        catch (Tml.ParserException ex)
+        {
+            Tml.Logger.LogException(ex);
+            return;
+        }
+        doc.Width = doc.LayoutedWidth = (int)container.rect.width;
+        doc.Height = doc.LayoutedHeight = 0;
+
+        new Tml.Layouter(doc).Reflow();
+
+        var param = new Tml.Element.RedrawParam();
+        param.Container = container;
+        param.Document = doc;
+        param.View = view;
+        param.Depth = 100;
+
+        doc.Redraw(param);
+
+        container.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, doc.LayoutedWidth);
+        container.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, doc.LayoutedHeight);
+    }
+
+    public Sprite GetSpriteAtlas(string spriteName){
 		for (int i = 0; i < DefaultSprites.Length; i++) {
 			if (DefaultSprites [i].name == spriteName) {
 				return DefaultSprites [i];
@@ -125,5 +135,39 @@ public class TmlView : MonoBehaviour {
 		ActiveEvent = ev;
 		OnEvent.Invoke ();
 	}
+
+    GameObject tips_;
+
+    public void ShowTips(Tml.Element e, RectTransform obj)
+    {
+        if( tips_ != null)
+        {
+            return;
+        }
+
+        tips_ = new GameObject();
+        var rt = tips_.AddComponent<RectTransform>();
+        rt.anchorMax = new Vector2(0, 1);
+        rt.anchorMin = new Vector2(0, 1);
+        rt.pivot = new Vector2(0, 1);
+        tips_.transform.SetParent(this.transform, false);
+        rt.sizeDelta = new Vector2(300, 100);
+
+        RenderToContainer(this, rt, e.Tips, DefaultSource);
+
+        var pos = new Vector3(obj.rect.xMax, obj.rect.yMax) - new Vector3(rt.rect.xMin, obj.rect.yMax);
+        rt.position = obj.localToWorldMatrix.MultiplyPoint(pos);
+    }
+
+    public void HideTips()
+    {
+        if (tips_ == null)
+        {
+            return;
+        }
+
+        Destroy(tips_);
+        tips_ = null;
+    }
 
 }

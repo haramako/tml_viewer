@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using UnityEngine.EventSystems;
 
 using UIText = UnityEngine.UI.Text;
 
@@ -48,9 +49,12 @@ namespace Tml {
 			obj_ = go.GetComponent<RectTransform> ();
 			if (obj_ == null) {
 				obj_ = go.AddComponent<RectTransform> ();
-			}
+                obj_.anchorMax = new Vector2(0, 1);
+                obj_.anchorMin = new Vector2(0, 1);
+                obj_.pivot = new Vector2(0, 1);
+            }
 
-			if (widgetMode_ == WidgetMode.None) {
+            if (widgetMode_ == WidgetMode.None) {
 				if (!string.IsNullOrEmpty (Style.BackgroundImage)) {
 					widgetMode_ = WidgetMode.Sprite;
 				}
@@ -74,7 +78,7 @@ namespace Tml {
 				}
 			}
 
-			obj_.localPosition = new Vector3 (LayoutedX, -LayoutedY);
+            obj_.localPosition = new Vector3 (LayoutedX, -LayoutedY);
 
 			var containerBackup = p.Container;
 			p.Container = obj_;
@@ -84,8 +88,11 @@ namespace Tml {
 			}
 			p.Depth -= 10;
 			p.Container = containerBackup;
-		}
-	}
+
+            obj_.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, LayoutedWidth);
+            obj_.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, LayoutedHeight);
+        }
+    }
 
 	// 画像
 	public partial class Img : InlineBlockElement {
@@ -108,7 +115,7 @@ namespace Tml {
 		public override void Redraw(RedrawParam p){
 			base.Redraw (p);
 
-			label_ = obj_.gameObject.AddComponent<UIText> ();
+            label_ = obj_.gameObject.AddComponent<UIText> ();
 			//label_.pivot = UIWidget.Pivot.TopLeft;
 			var text = Value;
 			if (StyleElement.Style.TextDecoration == "underline") {
@@ -136,11 +143,55 @@ namespace Tml {
                 button.colors = cb;
 				button.onClick.AddListener (this.OnClick);
 				view_ = p.View;
-			}
+
+            }
+
+            // TIPSの設定を行う
+            if (!string.IsNullOrEmpty(StyleElement.Tips))
+            {
+                var et = obj_.gameObject.AddComponent<ElementEventListener>();
+                et.Element = StyleElement;
+                et.Obj = obj_;
+                et.View = p.View;
+            }
+
             obj_.localPosition = new Vector3(LayoutedX, -LayoutedY);
         }
 
-		TmlView view_;
+        public class ElementEventListener : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+        {
+            public Element Element;
+            public TmlView View;
+            public RectTransform Obj;
+
+            public void OnPointerEnter(PointerEventData eventData)
+            {
+                if(!string.IsNullOrEmpty(Element.Tips))
+                {
+                    View.ShowTips(Element, Obj);
+                }
+            }
+
+            public void OnPointerExit(PointerEventData eventData)
+            {
+                if (!string.IsNullOrEmpty(Element.Tips))
+                {
+                    View.HideTips();
+                }
+            }
+        }
+
+        public void OnPointerEnter()
+        {
+
+        }
+
+        public void OnPointerEnterExit()
+        {
+
+        }
+
+        TmlView view_;
 
 		public void OnClick(){
 			view_.OnClickElement(new TmlView.EventInfo(){ Element = this.Parent, Fragment = this, Href=((A)StyleElement).Href });
