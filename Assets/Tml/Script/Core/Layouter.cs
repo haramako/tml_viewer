@@ -7,9 +7,16 @@ namespace Tml
 	/// <summary>
     /// レイアウトを行う
 	/// 
-	/// インラインElementのレイアウトを行うのが主な仕事
+	/// 
+	/// ブロック要素の場合、縦にエレメントを配置し、Widthを100%にする。
+	/// 
+	/// インライン要素の場合、横にエレメントを配置し、右に達したら折り返す。
     /// </summary>
 	public struct Layouter {
+
+        /// <summary>
+        /// レンダリングされた文字列の幅の情報
+        /// </summary>
 		public struct CharInfo {
 			public int CharacterCount;
 			public int TextWidth;
@@ -22,7 +29,7 @@ namespace Tml
             return new CharInfo { CharacterCount = c, TextWidth = c * fontSize };
         }
 
-#if UNITY_2017_2_OR_NEWER
+#if !NET_4_6
         public delegate CharInfo GetCharacterCountCallbackType(Element e,string text,int startPos,int fontSize,int width);
 		public static GetCharacterCountCallbackType GetCharacterCountCallback = DefaultGetCharacterCountCallback;
 #else
@@ -35,14 +42,17 @@ namespace Tml
 		int currentX_;
 		LayoutType mode_;
 
-		int lineStartIndex; // Fragmentsの中で、行の始まりのインデックス
+        /// <summary>
+        /// Fragmentsの中で、行の始まりからのインデックス
+        /// </summary>
+		int lineStartIndex_;
 
 		public Layouter(Element target){
 			Target = target;
 			currentX_ = 0;
 			currentY_ = target.Style.PaddingTop;
 			mode_ = LayoutType.Block;
-			lineStartIndex = 0;
+			lineStartIndex_ = 0;
 		}
 
 		/// <summary>
@@ -68,7 +78,13 @@ namespace Tml
 			}
 		}
 
-		// モードを変更する
+        /// <summary>
+		/// モードを変更する
+		/// 
+		/// モードが切り替わった際には、インラインのレイアウト情報のリセットを行う。
+		/// つまり、ブロックエレメントの次にインラインエレメントを配置する場合は、次の行の左端からはじまる。
+        /// </summary>
+        /// <param name="newMode">New mode.</param>
 		void setMode(LayoutType newMode){
 			if (mode_ != newMode) {
 				if (mode_ == LayoutType.Inline) {
@@ -110,13 +126,16 @@ namespace Tml
 			}
 		}
 
-		// ブロック要素を配置する
+        /// <summary>
+		/// ブロック要素を配置する
+        /// </summary>
+        /// <param name="e">E.</param>
 		void reflowBlock(Element e){
 			// ブロックレイアウトの場合
 			// まず、幅を決定してから、高さを計算する
 			e.LayoutedWidth = Target.LayoutedInnerWidth - e.Style.MarginLeft - e.Style.MarginBottom;
-			var layouter = new Layouter (e);
-			layouter.Reflow ();
+
+			new Layouter (e).Reflow();
 
 			e.CalculateBlockHeight ();
 			e.LayoutedY = currentY_ + e.Style.MarginTop;
@@ -126,6 +145,10 @@ namespace Tml
 			Target.Fragments.Add (e);
 		}
 
+        /// <summary>
+        /// インライン要素を配置する
+        /// </summary>
+        /// <param name="e">E.</param>
 		void reflowInline(Element e){
 			for (int i = 0; i < e.Children.Count; i++) {
 				reflowElement (e.Children [i]);
@@ -134,20 +157,23 @@ namespace Tml
 
 		void reflowInlineBlock(Element e){
 			e.LayoutedWidth = e.Width;
-			var layouter = new Layouter (e);
-			layouter.Reflow ();
+			new Layouter (e).Reflow();
 
 			e.CalculateBlockHeight ();
 
 			addInlineFragment (e);
 		}
 
+        /// <summary>
+		/// TextFragment用の空のスタイル
+		/// 
+        /// 共有しているので、変更しないように注意！
+        /// </summary>
+		static Style emptyStyle_ = Style.Empty().Seal();
 
-		CharInfo getCharacterCount(Element e, string text, int startPos, int fontSize, int width){
-			return GetCharacterCountCallback (e, text, startPos, fontSize, width);
-		}
-
-		// インライン要素を配置する
+        /// <summary>
+		/// テキスト要素を配置する
+        /// </summary>
 		void reflowText(Element e){
 			var text = (Text)e;
 			// テキストの場合
@@ -155,7 +181,7 @@ namespace Tml
 			int cur = 0;
 			var fontSize = text.Parent.ActualFontSize ();
 			while (true) {
-				var charInfo = getCharacterCount (text, str, cur, fontSize, Target.LayoutedInnerWidth - currentX_);
+				var charInfo = GetCharacterCountCallback (text, str, cur, fontSize, Target.LayoutedInnerWidth - currentX_);
 				var n = charInfo.CharacterCount;
 				if (n == 0) {
 					if (currentX_ == 0) {
@@ -171,10 +197,7 @@ namespace Tml
 				var fragment = new TextFragment ();
 				fragment.Parent = e;
 				fragment.Tag = "text";
-				var s = Style.Empty();
-				s.Seal();
-
-				fragment.Style = s;
+				fragment.Style = emptyStyle_;
 				fragment.Value = str.Substring (cur, n);
 				fragment.CalculateBlockHeight ();
 				fragment.LayoutedWidth = charInfo.TextWidth;
@@ -198,7 +221,7 @@ namespace Tml
 		}
 
 		void resetInline(){
-			lineStartIndex = Target.Fragments.Count;
+			lineStartIndex_ = Target.Fragments.Count;
 			currentX_ = 0;
 		}
 
@@ -206,7 +229,7 @@ namespace Tml
 			var x = Target.Style.PaddingLeft;
 			var lineHeight = 0;
 			var len = Target.Fragments.Count;
-			for (int i = lineStartIndex; i < len; i++) {
+			for (int i = lineStartIndex_; i < len; i++) {
 				var e = Target.Fragments [i];
 				if (e.LayoutedHeight > lineHeight) {
 					lineHeight = e.LayoutedHeight;
@@ -220,14 +243,14 @@ namespace Tml
 				gap = Target.LayoutedWidth - currentX_;
 			}
 				
-			for (int i = lineStartIndex; i < Target.Fragments.Count; i++) {
+			for (int i = lineStartIndex_; i < Target.Fragments.Count; i++) {
 				var e = Target.Fragments [i];
 				e.LayoutedY = currentY_ + lineHeight - e.LayoutedHeight;
 				e.LayoutedX = x + gap;
 				x += e.LayoutedWidth;
 			}
 			
-			lineStartIndex = Target.Fragments.Count;
+			lineStartIndex_ = Target.Fragments.Count;
 			currentX_ = 0;
 			currentY_ += lineHeight;
 		}

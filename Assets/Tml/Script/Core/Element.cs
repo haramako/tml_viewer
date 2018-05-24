@@ -49,6 +49,7 @@ namespace Tml
         public int Width;
         public int Height;
         public string Tips;
+		public string Href;
 
         public Element Parent;
         public List<Element> Children = new List<Element>();
@@ -110,6 +111,9 @@ namespace Tml
                 case "height":
                     Height = int.Parse(value);
                     break;
+				case "href":
+                    Href = value;
+                    break;
                 case "tips":
                     Tips = value;
                     break;
@@ -148,6 +152,22 @@ namespace Tml
 			
         }
 
+		public string ActualColor()
+        {
+            if (Style.Color != "")
+            {
+                return Style.Color;
+            }
+            else if (Parent != null)
+            {
+				return Parent.ActualColor();
+            }
+            else
+            {
+				return "";
+            }
+        }
+
 		public int ActualFontSize(){
 			if (Style.FontSize != Style.Inherit) {
 				return Style.FontSize;
@@ -178,17 +198,49 @@ namespace Tml
 			}
 		}
 
-		public int ActualComputedLineHeight(){
+		public int ActualComputedLineHeight(int fontSize){
 			if (Style.LineHeight != Style.Inherit) {
 				return Style.LineHeight;
 			} else if( Style.LineScale != Style.InheritFloat ){
-				return (int)(ActualFontSize () * Style.LineScale);
+				return (int)(fontSize * Style.LineScale);
 			} else if (Parent != null) {
-				return Parent.ActualComputedLineHeight ();
+				return Parent.ActualComputedLineHeight (fontSize);
 			} else {
 				return (int)(Style.DefaultFontSize * Style.DefaultLineScale);
 			}
 		}
+
+		public string ActualHref()
+		{
+			if (Href != null)
+			{
+				return Href;
+			}
+			else if (Parent != null)
+			{
+				return Parent.ActualHref();
+			}
+			else
+			{
+				return null;
+			}
+        }
+
+		public string ActualTips()
+        {
+            if (Tips != null)
+            {
+                return Tips;
+            }
+            else if (Parent != null)
+            {
+                return Parent.ActualTips();
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         //==========================================================
         // デバッグ用出力
@@ -283,19 +335,6 @@ namespace Tml
 
 	public partial class A : InlineElement
 	{
-		public string Href;
-
-		public override void ParseAttribute(string name, string value)
-		{
-			switch (name) {
-			case "href":
-				Href = value;
-				break;
-			default:
-				base.ParseAttribute (name, value);
-				break;
-			}
-		}
 	}
 
 	public partial class Img : InlineBlockElement {
@@ -360,12 +399,10 @@ namespace Tml
 
 		public override void CalculateBlockHeight()
 		{
-			var lineHeight = ActualComputedLineHeight ();
-			UnityEngine.Debug.Log("lh: " + lineHeight);
+			var fontSize = ActualFontSize();
+			var lineHeight = ActualComputedLineHeight (fontSize);
 			if (lineHeight == Style.Nothing) {
-				Logger.Log("FS: " + ActualFontSize());
-				LayoutedHeight = (int)(ActualFontSize () * 1.5f);
-				//LayoutedHeight = StyleElement.ActualFontSize ();
+				LayoutedHeight = (int)(fontSize * 1.5f);
 			} else {
 				LayoutedHeight = lineHeight;
 			}

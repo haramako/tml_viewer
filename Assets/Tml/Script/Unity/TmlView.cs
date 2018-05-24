@@ -68,7 +68,7 @@ public class TmlView : MonoBehaviour {
 	public void SetSource(string src, string defaultSource)
     {
 		if (Document != null) {
-			GameObject.Destroy (Document.obj_.gameObject);
+			Document.DestroyObject();
 		}
 
         DefaultSource = defaultSource;
@@ -99,6 +99,7 @@ public class TmlView : MonoBehaviour {
         param.View = view;
 
         doc.Redraw(param);
+		doc.RedrawAfter(param);
 
         container.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, doc.LayoutedWidth);
         container.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, doc.LayoutedHeight);

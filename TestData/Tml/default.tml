@@ -31,6 +31,7 @@ box {
 
 large {
   font-size: 48;
+  line-height: 64;
 }
 
 red {

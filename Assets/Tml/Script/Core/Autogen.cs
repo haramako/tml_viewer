@@ -45,7 +45,7 @@ namespace Tml {
             if( over.BackgroundColor != null ) BackgroundColor = over.BackgroundColor;
 		}
 
-		public void Seal(){
+		public Style Seal(){
             if( MarginLeft == Nothing ) MarginLeft = 0;
             if( MarginRight == Nothing ) MarginRight = 0;
             if( MarginTop == Nothing ) MarginTop = 0;
@@ -63,6 +63,7 @@ namespace Tml {
             if( TextAlign == null ) TextAlign = "";
             if( BackgroundImage == null ) BackgroundImage = "";
             if( BackgroundColor == null ) BackgroundColor = "";
+            return this;
 		}
 
         public void SetField(string name, string value){

@@ -27,10 +27,11 @@ namespace Tml {
             <%- end -%>
 		}
 
-		public void Seal(){
+		public Style Seal(){
             <%- style_fields.each do |f| -%>
             if( <%=f.cs_name%> == <%=f.empty_value%> ) <%=f.cs_name%> = <%=f.seal_value%>;
             <%- end -%>
+            return this;
 		}
 
         public void SetField(string name, string value){

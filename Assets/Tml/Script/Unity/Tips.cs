@@ -24,7 +24,7 @@ public class Tips {
         tips_.transform.SetParent(view.transform, false);
         rt.sizeDelta = new Vector2(300, 100);
 
-        TmlView.RenderToContainer(view, rt, e.Tips, view.DefaultSource);
+        TmlView.RenderToContainer(view, rt, e.ActualTips(), view.DefaultSource);
 
         var pos = new Vector3(obj.rect.xMax, obj.rect.yMax) - new Vector3(rt.rect.xMin, obj.rect.yMax);
         rt.position = obj.localToWorldMatrix.MultiplyPoint(pos);

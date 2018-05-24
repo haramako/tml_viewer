@@ -16,7 +16,7 @@ namespace Tml {
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (!string.IsNullOrEmpty(Element.Tips))
+            if (!string.IsNullOrEmpty(Element.ActualTips()))
             {
                 View.ShowTips(Element, Obj);
             }
@@ -24,13 +24,21 @@ namespace Tml {
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            if (!string.IsNullOrEmpty(Element.Tips))
+            if (!string.IsNullOrEmpty(Element.ActualTips()))
             {
                 View.HideTips();
             }
         }
     }
 
+
+	public partial class Document : BlockElement
+	{
+		public void DestroyObject()
+		{
+			GameObject.Destroy(obj_.gameObject);
+		}
+	}
 
 	public partial class Element {
 
@@ -41,8 +49,9 @@ namespace Tml {
 			public RectTransform Container;
 		}
 		
-		public RectTransform obj_;
-		public Graphic widget_;
+		protected RectTransform obj_;
+		protected Graphic widget_;
+		TmlView view_;
 
 		protected enum WidgetMode { None, Widget, Sprite, Text }
 		protected WidgetMode widgetMode_ = WidgetMode.None;
@@ -68,7 +77,31 @@ namespace Tml {
 			}
 		}
 
+		public virtual void RedrawAfter(RedrawParam p)
+		{
+			// リンクの設定を行う
+            if (ActualHref() != null)
+            {
+                var button = obj_.gameObject.AddComponent<Button>();
+                ColorBlock cb = button.colors;
+                cb.highlightedColor = new Color(0.5f, 0.5f, 1.0f); // ハイライト
+                button.colors = cb;
+                button.onClick.AddListener(this.OnClick);
+            }
+
+			// TIPSの設定を行う
+			if (!string.IsNullOrEmpty(ActualTips()))
+            {
+                var et = obj_.gameObject.AddComponent<ElementEventListener>();
+                et.Element = this;
+                et.Obj = obj_;
+                et.View = p.View;
+            }
+		}
+
         public virtual void Redraw(RedrawParam p){
+			view_ = p.View;
+
 			var go = new GameObject ("" + Tag + ":" + Id);
 			go.transform.SetParent (p.Container.transform, false);
 			obj_ = go.GetComponent<RectTransform> ();
@@ -101,12 +134,18 @@ namespace Tml {
 			p.Container = obj_;
 			for (int i = 0; i < Fragments.Count; i++) {
 				Fragments [i].Redraw (p);
+				Fragments[i].RedrawAfter(p);
 			}
 			p.Container = containerBackup;
 
             obj_.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, LayoutedWidth);
             obj_.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, LayoutedHeight);
 			obj_.anchoredPosition = new Vector2(LayoutedX, -LayoutedY);
+        }
+
+		public void OnClick()
+        {
+            view_.OnClickElement(new TmlView.EventInfo() { Element = this.Parent, Fragment = this, Href = ActualHref() });
         }
     }
 
@@ -147,7 +186,6 @@ namespace Tml {
 
 			base.Redraw (p);
 
-			Debug.Log(Tag + " " + Value);
             label_ = obj_.gameObject.AddComponent<UIText> ();
 			var text = Value;
 			if (Style.TextDecoration == "underline") {
@@ -159,36 +197,14 @@ namespace Tml {
 			label_.font = p.View.DefaultFont;
 			label_.verticalOverflow = VerticalWrapMode.Overflow;
 			label_.horizontalOverflow = HorizontalWrapMode.Overflow;
-			if (!string.IsNullOrEmpty(Style.Color))
+			var color = ActualColor();
+			if (!string.IsNullOrEmpty(color))
             {
-				label_.color = ColorFromString(Style.Color);
+				label_.color = ColorFromString(color);
             }
 
-			if (Tag == "a") {
-				var button = obj_.gameObject.AddComponent<Button> ();
-                ColorBlock cb = button.colors;
-                cb.highlightedColor = new Color(0.5f, 0.5f, 1.0f); // ハイライト
-                button.colors = cb;
-				button.onClick.AddListener (this.OnClick);
-				view_ = p.View;
-
-            }
-
-            // TIPSの設定を行う
-            if (!string.IsNullOrEmpty(Tips))
-            {
-                var et = obj_.gameObject.AddComponent<ElementEventListener>();
-				et.Element = this;
-                et.Obj = obj_;
-                et.View = p.View;
-            }
         }
 
-        TmlView view_;
-
-		public void OnClick(){
-			//view_.OnClickElement(new TmlView.EventInfo(){ Element = this.Parent, Fragment = this, Href=((A)StyleElement).Href });
-		}
 	}
 
 }
