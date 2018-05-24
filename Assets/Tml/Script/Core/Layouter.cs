@@ -10,14 +10,21 @@ namespace Tml
 			public int TextWidth;
 		}
 
-		#if UNITY_2017_2_OR_NEWER
-		public delegate CharInfo GetCharacterCountCallbackType(Element e,string text,int startPos,int fontSize,int width);
-		public static GetCharacterCountCallbackType GetCharacterCountCallback;
-		#else
-		public static Func<Element,string,int,int,int,CharInfo> GetCharacterCountCallback;
-		#endif
+        public static CharInfo DefaultGetCharacterCountCallback(Element e, string text, int startPos, int fontSize, int width)
+        {
+            var c = width / fontSize;
+            if (c >= text.Length - startPos) c = text.Length - startPos;
+            return new CharInfo { CharacterCount = c, TextWidth = c * fontSize };
+        }
 
-		public Element Target { get; private set; }
+#if UNITY_2017_2_OR_NEWER
+        public delegate CharInfo GetCharacterCountCallbackType(Element e,string text,int startPos,int fontSize,int width);
+		public static GetCharacterCountCallbackType GetCharacterCountCallback = DefaultGetCharacterCountCallback;
+#else
+		public static Func<Element,string,int,int,int,CharInfo> GetCharacterCountCallback = DefaultGetCharacterCountCallback;
+#endif
+
+        public Element Target { get; private set; }
 
 		int currentY_;
 		int currentX_;
@@ -126,14 +133,9 @@ namespace Tml
 			addInlineFragment (e);
 		}
 
+
 		CharInfo getCharacterCount(Element e, string text, int startPos, int fontSize, int width){
-			if (GetCharacterCountCallback != null) {
-				return GetCharacterCountCallback (e, text, startPos, fontSize, width);
-			}else{
-				var c = width / fontSize;
-				if (c >= text.Length - startPos) c = text.Length - startPos;
-				return new CharInfo{ CharacterCount = c, TextWidth = c * fontSize };
-			}
+			return GetCharacterCountCallback (e, text, startPos, fontSize, width);
 		}
 
 		// インライン要素を配置する

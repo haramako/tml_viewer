@@ -1,0 +1,27 @@
+<style>
+large {
+  font-scale: 1.5;
+}
+
+h1 {
+  font-size: 18;
+  line-height: 32;
+}
+
+bg {
+  line-scale: 3.0;
+}
+
+bg-red {
+  background-color: red;
+}
+
+red {
+  color: #ff0000;
+}
+</style>
+<h1>style test</h1>
+
+<div class="bg">
+  hogee<span class="large red">fuga</span><span class="bg-red">piyo</span>fdf
+</div>

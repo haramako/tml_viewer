@@ -1,0 +1,40 @@
+<style>
+document {
+  padding: 20 30;
+  background-image: DefaultPanel;
+}
+
+a {
+  color: #8888FF;
+  text-decoration: underline;
+}
+
+h1 {
+  font-size: 32;
+  line-height: 40;
+  background-image: "DefaultHeader";
+  padding: 20 0;
+  margin: 20 40;
+  text-align: center;
+}
+
+p {
+  /* line-height: 32; */
+}
+
+div {
+}
+
+box {
+  background-image: "button_item";
+}
+
+large {
+  font-size: 48;
+}
+
+red {
+  color: #FF4400;
+}
+
+</style>

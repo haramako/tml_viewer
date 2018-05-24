@@ -15,7 +15,11 @@ namespace Tml
 
 		[SetUp]
 		public void SetUp(){
-			Tml.Logger.Enabled = true;
+            Layouter.GetCharacterCountCallback = Layouter.DefaultGetCharacterCountCallback;
+            Style.DefaultFontSize = 10;
+            Style.DefaultLineScale = 1.5f;
+
+            Tml.Logger.Enabled = true;
 			styleSheet_ = new StyleSheet ();
 		}
 
@@ -74,7 +78,6 @@ namespace Tml
 			layouter.Reflow();
 			var p1 = root.FindById ("p1");
 			var p2 = root.FindById ("p2");
-			Logger.Log (p1.Id);
 			Assert.AreEqual(95, p1.LayoutedWidth);
 			Assert.AreEqual(15, p1.LayoutedHeight);
 			Assert.AreEqual(15, p2.LayoutedHeight);

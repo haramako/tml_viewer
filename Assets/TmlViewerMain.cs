@@ -79,13 +79,19 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 
 	public void LogFormat (LogType logType, UnityEngine.Object context, string format, params object[] args)
 	{
-		LogText.text += string.Format (format, args) + "\n";
+        if (LogText != null)
+        {
+            LogText.text += string.Format(format, args) + "\n";
+        }
 		Debug.unityLogger.LogFormat (logType, context, format, args);
 	}
 
 	public void LogException (Exception exception, UnityEngine.Object context)
 	{
-		LogText.text += exception.Message + "\n";
+        if (LogText != null)
+        {
+            LogText.text += exception.Message + "\n";
+        }
 		Debug.unityLogger.LogException (exception, context);
 	}
 

@@ -131,6 +131,9 @@ namespace Tml {
 
 			if (StyleElement.Tag == "a") {
 				var button = obj_.gameObject.AddComponent<Button> ();
+                ColorBlock cb = button.colors;
+                cb.highlightedColor = new Color(0.5f, 0.5f, 1.0f); // ハイライト
+                button.colors = cb;
 				button.onClick.AddListener (this.OnClick);
 				view_ = p.View;
 			}

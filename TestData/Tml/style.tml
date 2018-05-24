@@ -1,0 +1,11 @@
+<style>
+// BGのテスト
+bg {
+  background-image: "icon"; /* bg */
+}
+</style>
+<h1>style test</h1>
+
+<div class="bg">
+  hoge
+</div>

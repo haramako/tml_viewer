@@ -1,0 +1,20 @@
+<h1>background-image</h1>
+<div class="box">
+  hoge
+</div>
+
+<div width="70">
+  ho
+  <img src="button_item" width='30' height='40'/>
+  geee
+</div>
+
+<div width="70">
+  <a href="index.tml">hoge</a>hogefugafuga
+  <img src="button_item" width='30' height='40'/>
+  geee
+</div>
+
+<div width="70">
+  hogeho<img src="button_item" width='30' height='40'/>gefugafuga
+</div>

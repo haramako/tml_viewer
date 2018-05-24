@@ -1,0 +1,18 @@
+<style>
+div {
+  margin-left: 10;
+  margin-right: 10;
+  margin-top: 10;
+  margin-bottom: 10;
+
+  padding-left: 5;
+  padding-right: 5;
+  padding-top: 5;
+  padding-bottom: 5;
+}
+</style>
+<div width="70">
+  <div width="40">hogefugapiyo</div>
+  <div width="40">hoge<span>fuga</span>piyo</div>
+  <div>hoge<div>fuga</div>piyo</div>
+</div>
