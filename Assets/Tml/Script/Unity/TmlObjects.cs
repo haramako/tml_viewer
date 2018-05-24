@@ -7,29 +7,51 @@ using UIText = UnityEngine.UI.Text;
 
 namespace Tml {
 
+
+	public class ElementEventListener : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+    {
+        public Element Element;
+        public TmlView View;
+        public RectTransform Obj;
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            if (!string.IsNullOrEmpty(Element.Tips))
+            {
+                View.ShowTips(Element, Obj);
+            }
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            if (!string.IsNullOrEmpty(Element.Tips))
+            {
+                View.HideTips();
+            }
+        }
+    }
+
+
 	public partial class Element {
 
 		public class RedrawParam
 		{
 			public TmlView View;
 			public Document Document;
-			public int Depth;
 			public RectTransform Container;
 		}
 		
 		public RectTransform obj_;
 		public Graphic widget_;
 
-		protected enum WidgetMode { None, Widget, Sprite }
+		protected enum WidgetMode { None, Widget, Sprite, Text }
 		protected WidgetMode widgetMode_ = WidgetMode.None;
 
 		WidgetMode savedWidgetMode_ = WidgetMode.None;
 
 		protected void updateWidgetMode(){
-			if (savedWidgetMode_ == widgetMode_) return;
+			if (savedWidgetMode_ == widgetMode_ ) return;
 			savedWidgetMode_ = widgetMode_;
-
-			Object.DestroyImmediate (widget_);
 
 			switch (savedWidgetMode_) {
 			case WidgetMode.None:
@@ -40,10 +62,13 @@ namespace Tml {
 			case WidgetMode.Sprite:
 				widget_ = obj_.gameObject.AddComponent<Image> ();
 				break;
+			case WidgetMode.Text:
+                widget_ = null;
+                break;
 			}
 		}
 
-		public virtual void Redraw(RedrawParam p){
+        public virtual void Redraw(RedrawParam p){
 			var go = new GameObject ("" + Tag + ":" + Id);
 			go.transform.SetParent (p.Container.transform, false);
 			obj_ = go.GetComponent<RectTransform> ();
@@ -63,12 +88,6 @@ namespace Tml {
 			updateWidgetMode ();
 
 			if (widget_ != null) {
-				obj_.anchorMax = new Vector2 (0, 1);
-				obj_.anchorMin = new Vector2 (0, 1);
-				obj_.pivot = new Vector2 (0, 1);
-				obj_.SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, LayoutedWidth);
-				obj_.SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, LayoutedHeight);
-				//obj_.depth = p.Depth;
 				if (widgetMode_ == WidgetMode.Sprite) {
 					var sprite = (Image)widget_;
 					p.View.GetSprite (Style.BackgroundImage).Done (spr => {
@@ -78,19 +97,16 @@ namespace Tml {
 				}
 			}
 
-            obj_.localPosition = new Vector3 (LayoutedX, -LayoutedY);
-
 			var containerBackup = p.Container;
 			p.Container = obj_;
-			p.Depth += 10;
 			for (int i = 0; i < Fragments.Count; i++) {
 				Fragments [i].Redraw (p);
 			}
-			p.Depth -= 10;
 			p.Container = containerBackup;
 
             obj_.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, LayoutedWidth);
             obj_.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, LayoutedHeight);
+			obj_.anchoredPosition = new Vector2(LayoutedX, -LayoutedY);
         }
     }
 
@@ -112,31 +128,43 @@ namespace Tml {
 	public partial class TextFragment : Element {
 		UIText label_;
 
+		public static Color ColorFromString(string s)
+		{
+			Color color;
+			if (ColorUtility.TryParseHtmlString(s, out color))
+			{
+				return color;
+			}
+			else
+			{
+				Logger.LogError("Can't parse color" + s);
+				return Color.white;
+			}
+		}
+
 		public override void Redraw(RedrawParam p){
+			widgetMode_ = WidgetMode.Text;
+
 			base.Redraw (p);
 
+			Debug.Log(Tag + " " + Value);
             label_ = obj_.gameObject.AddComponent<UIText> ();
-			//label_.pivot = UIWidget.Pivot.TopLeft;
 			var text = Value;
-			if (StyleElement.Style.TextDecoration == "underline") {
+			if (Style.TextDecoration == "underline") {
 				//text = "<[u]" + text;
 			}
-			if (!string.IsNullOrEmpty (StyleElement.Style.Color)) {
-				text = "<color=#" + StyleElement.Style.Color.Substring(1) + ">" + text + "</color>";
-			}
 			label_.text = text;
-			label_.fontSize = StyleElement.ActualFontSize();
+			label_.fontSize = ActualFontSize();
 			label_.alignment = TextAnchor.LowerLeft;
 			label_.font = p.View.DefaultFont;
 			label_.verticalOverflow = VerticalWrapMode.Overflow;
-			//label_.depth = p.Depth + 1;
-			var rt = obj_.GetComponent<RectTransform>();
-			rt.pivot = new Vector2 (0, 1);
-			rt.SetSizeWithCurrentAnchors (RectTransform.Axis.Vertical, LayoutedHeight);
-			rt.SetSizeWithCurrentAnchors (RectTransform.Axis.Horizontal, LayoutedWidth * 1.1f);
-			//label_.SetRect (0, -LayoutedHeight, LayoutedWidth * 1.1f /* 幅が足りないことがあるので */, LayoutedHeight);
+			label_.horizontalOverflow = HorizontalWrapMode.Overflow;
+			if (!string.IsNullOrEmpty(Style.Color))
+            {
+				label_.color = ColorFromString(Style.Color);
+            }
 
-			if (StyleElement.Tag == "a") {
+			if (Tag == "a") {
 				var button = obj_.gameObject.AddComponent<Button> ();
                 ColorBlock cb = button.colors;
                 cb.highlightedColor = new Color(0.5f, 0.5f, 1.0f); // ハイライト
@@ -147,54 +175,19 @@ namespace Tml {
             }
 
             // TIPSの設定を行う
-            if (!string.IsNullOrEmpty(StyleElement.Tips))
+            if (!string.IsNullOrEmpty(Tips))
             {
                 var et = obj_.gameObject.AddComponent<ElementEventListener>();
-                et.Element = StyleElement;
+				et.Element = this;
                 et.Obj = obj_;
                 et.View = p.View;
             }
-
-            obj_.localPosition = new Vector3(LayoutedX, -LayoutedY);
-        }
-
-        public class ElementEventListener : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
-        {
-            public Element Element;
-            public TmlView View;
-            public RectTransform Obj;
-
-            public void OnPointerEnter(PointerEventData eventData)
-            {
-                if(!string.IsNullOrEmpty(Element.Tips))
-                {
-                    View.ShowTips(Element, Obj);
-                }
-            }
-
-            public void OnPointerExit(PointerEventData eventData)
-            {
-                if (!string.IsNullOrEmpty(Element.Tips))
-                {
-                    View.HideTips();
-                }
-            }
-        }
-
-        public void OnPointerEnter()
-        {
-
-        }
-
-        public void OnPointerEnterExit()
-        {
-
         }
 
         TmlView view_;
 
 		public void OnClick(){
-			view_.OnClickElement(new TmlView.EventInfo(){ Element = this.Parent, Fragment = this, Href=((A)StyleElement).Href });
+			//view_.OnClickElement(new TmlView.EventInfo(){ Element = this.Parent, Fragment = this, Href=((A)StyleElement).Href });
 		}
 	}
 

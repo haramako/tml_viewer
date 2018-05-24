@@ -9,5 +9,8 @@ Toydea Markup Language
 * パッド対応
   - MEMO:通常のUIのnavigationは使い物にならない
 * Tool Tip
-  * マウスオーバーでカーソル
+  * 画面の位置に応じて、TIPSの表示位置を変える
+* マウスオーバーでカーソル
 * 使い回しのリストビュー
+
+* ルビ

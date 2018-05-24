@@ -12,6 +12,7 @@ obj/
 *.suo
 *.sln
 *.pdb
+.vs
 
 # Mac
 __MACOSX

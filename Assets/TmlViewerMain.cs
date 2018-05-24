@@ -56,7 +56,6 @@ public class TmlViewerMain : MonoBehaviour, ILogHandler {
 
 		var www = new WWW (Url);
 		yield return www;
-        Debug.Log(Url);
 
 		if (!string.IsNullOrEmpty (www.error)) {
 			Debug.Log ("error:" + www.error);

@@ -145,6 +145,7 @@ namespace Tml
 
         public virtual void CalculateBlockHeight()
         {
+			
         }
 
 		public int ActualFontSize(){
@@ -351,7 +352,6 @@ namespace Tml
 	public partial class TextFragment : Element
 	{
 		public string Value;
-		public Element StyleElement;
 
 		public TextFragment() : base()
 		{
@@ -360,9 +360,11 @@ namespace Tml
 
 		public override void CalculateBlockHeight()
 		{
-			var lineHeight = StyleElement.ActualComputedLineHeight ();
+			var lineHeight = ActualComputedLineHeight ();
+			UnityEngine.Debug.Log("lh: " + lineHeight);
 			if (lineHeight == Style.Nothing) {
-				LayoutedHeight = (int)(StyleElement.ActualFontSize () * 1.5f);
+				Logger.Log("FS: " + ActualFontSize());
+				LayoutedHeight = (int)(ActualFontSize () * 1.5f);
 				//LayoutedHeight = StyleElement.ActualFontSize ();
 			} else {
 				LayoutedHeight = lineHeight;
@@ -379,14 +381,14 @@ namespace Tml
 				LayoutedY,
 				LayoutedWidth,
 				LayoutedHeight,
-				StyleElement.ActualFontSize(),
-				StyleElement.Style.BackgroundColor
+				ActualFontSize(),
+				Style.BackgroundColor
 			));
-			if (StyleElement.Tag == "a") {
-				buf.Append (string.Format ("<a href='{0}.html'>", ((A)StyleElement).Href));
+			if (Tag == "a") {
+				//buf.Append (string.Format ("<a href='{0}.html'>", ((A)StyleElement).Href));
 			}
 			buf.Append (Value);
-			if (StyleElement.Tag == "a") {
+			if (Tag == "a") {
 				buf.Append ("</a>");
 			}
 			buf.Append(' ', level * 2);

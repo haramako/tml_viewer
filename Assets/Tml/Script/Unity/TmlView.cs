@@ -27,6 +27,8 @@ public class TmlView : MonoBehaviour {
 	public string Source { get; private set; }
     public string DefaultSource { get; private set; }
 
+	RectTransform root_;
+
     public Uri BaseUrl;
 	Dictionary<string,Sprite> sprites_ = new Dictionary<string,Sprite>();
 
@@ -71,10 +73,10 @@ public class TmlView : MonoBehaviour {
 
         DefaultSource = defaultSource;
 		Source = src;
-        RenderToContainer(this, Container, src, DefaultSource);
+        Document = RenderToContainer(this, Container, src, DefaultSource);
 	}
 
-    public static void RenderToContainer(TmlView view, RectTransform container, string src, string defaultSrc)
+    public static Tml.Document RenderToContainer(TmlView view, RectTransform container, string src, string defaultSrc)
     {
         Tml.Document doc;
         try
@@ -84,7 +86,7 @@ public class TmlView : MonoBehaviour {
         catch (Tml.ParserException ex)
         {
             Tml.Logger.LogException(ex);
-            return;
+            return null;
         }
         doc.Width = doc.LayoutedWidth = (int)container.rect.width;
         doc.Height = doc.LayoutedHeight = 0;
@@ -95,12 +97,13 @@ public class TmlView : MonoBehaviour {
         param.Container = container;
         param.Document = doc;
         param.View = view;
-        param.Depth = 100;
 
         doc.Redraw(param);
 
         container.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, doc.LayoutedWidth);
         container.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, doc.LayoutedHeight);
+
+		return doc;
     }
 
     public Sprite GetSpriteAtlas(string spriteName){
@@ -136,38 +139,16 @@ public class TmlView : MonoBehaviour {
 		OnEvent.Invoke ();
 	}
 
-    GameObject tips_;
+    Tips tips_ = new Tips();
 
     public void ShowTips(Tml.Element e, RectTransform obj)
     {
-        if( tips_ != null)
-        {
-            return;
-        }
-
-        tips_ = new GameObject();
-        var rt = tips_.AddComponent<RectTransform>();
-        rt.anchorMax = new Vector2(0, 1);
-        rt.anchorMin = new Vector2(0, 1);
-        rt.pivot = new Vector2(0, 1);
-        tips_.transform.SetParent(this.transform, false);
-        rt.sizeDelta = new Vector2(300, 100);
-
-        RenderToContainer(this, rt, e.Tips, DefaultSource);
-
-        var pos = new Vector3(obj.rect.xMax, obj.rect.yMax) - new Vector3(rt.rect.xMin, obj.rect.yMax);
-        rt.position = obj.localToWorldMatrix.MultiplyPoint(pos);
+		tips_.Show(this, e, obj);
     }
 
     public void HideTips()
     {
-        if (tips_ == null)
-        {
-            return;
-        }
-
-        Destroy(tips_);
-        tips_ = null;
+		tips_.Hide();
     }
 
 }

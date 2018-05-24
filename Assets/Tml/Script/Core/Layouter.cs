@@ -4,7 +4,12 @@ using System.Linq;
 
 namespace Tml
 {
-	public class Layouter {
+	/// <summary>
+    /// レイアウトを行う
+	/// 
+	/// インラインElementのレイアウトを行うのが主な仕事
+    /// </summary>
+	public struct Layouter {
 		public struct CharInfo {
 			public int CharacterCount;
 			public int TextWidth;
@@ -28,11 +33,16 @@ namespace Tml
 
 		int currentY_;
 		int currentX_;
-		LayoutType mode_ = LayoutType.Block;
+		LayoutType mode_;
+
 		int lineStartIndex; // Fragmentsの中で、行の始まりのインデックス
 
 		public Layouter(Element target){
 			Target = target;
+			currentX_ = 0;
+			currentY_ = target.Style.PaddingTop;
+			mode_ = LayoutType.Block;
+			lineStartIndex = 0;
 		}
 
 		/// <summary>
@@ -41,7 +51,6 @@ namespace Tml
 		public void Reflow()
 		{
 			Target.Fragments.Clear ();
-			currentY_ = Target.Style.PaddingTop;
 
 			foreach( var e in Target.Children)
 			{
@@ -152,7 +161,7 @@ namespace Tml
 					if (currentX_ == 0) {
 						// １文字も入らない幅の時の特別処理
 						n = 1;
-						charInfo.TextWidth = (int)(fontSize * 1.1f); // TODO: ちゃんとするべし
+						charInfo.TextWidth = (int)(fontSize);
 					} else {
 						newlineInline ();
 						continue;
@@ -160,9 +169,12 @@ namespace Tml
 				}
 				if (cur + n >= str.Length) n = str.Length - cur;
 				var fragment = new TextFragment ();
+				fragment.Parent = e;
 				fragment.Tag = "text";
-				fragment.StyleElement = e.Parent;
-				fragment.Style = text.Style;
+				var s = Style.Empty();
+				s.Seal();
+
+				fragment.Style = s;
 				fragment.Value = str.Substring (cur, n);
 				fragment.CalculateBlockHeight ();
 				fragment.LayoutedWidth = charInfo.TextWidth;
@@ -193,7 +205,8 @@ namespace Tml
 		void newlineInline(){
 			var x = Target.Style.PaddingLeft;
 			var lineHeight = 0;
-			for (int i = lineStartIndex; i < Target.Fragments.Count; i++) {
+			var len = Target.Fragments.Count;
+			for (int i = lineStartIndex; i < len; i++) {
 				var e = Target.Fragments [i];
 				if (e.LayoutedHeight > lineHeight) {
 					lineHeight = e.LayoutedHeight;
