@@ -1,7 +1,8 @@
 <style>
 document {
   padding: 20 30;
-  background-image: DefaultPanel;
+  background-image: "UnitFrame_Small_Background";
+  /* background-image: DefaultPanel; */
 }
 
 a {
@@ -12,7 +13,8 @@ a {
 h1 {
   font-size: 32;
   line-height: 40;
-  background-image: "DefaultHeader";
+  /* background-image: "DefaultHeader"; */
+  background-image: "ActionBar_Slot_PowerBox";
   padding: 20 0;
   margin: 20 40;
   text-align: center;
@@ -26,7 +28,8 @@ div {
 }
 
 box {
-  background-image: "button_item";
+  background-image: "Window_Inner_Background_Yellow";
+  /* background-image: "button_item"; */
 }
 
 large {
