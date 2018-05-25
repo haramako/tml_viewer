@@ -4,15 +4,20 @@ using System.Linq;
 
 namespace Tml
 {
-	/// <summary>
+    public interface ICumtomLayouter
+    {
+        void Reflow();
+    }
+
+    /// <summary>
     /// レイアウトを行う
-	/// 
-	/// 
-	/// ブロック要素の場合、縦にエレメントを配置し、Widthを100%にする。
-	/// 
-	/// インライン要素の場合、横にエレメントを配置し、右に達したら折り返す。
+    /// 
+    /// 
+    /// ブロック要素の場合、縦にエレメントを配置し、Widthを100%にする。
+    /// 
+    /// インライン要素の場合、横にエレメントを配置し、右に達したら折り返す。
     /// </summary>
-	public struct Layouter {
+    public struct Layouter {
 
         /// <summary>
         /// レンダリングされた文字列の幅の情報
@@ -29,7 +34,7 @@ namespace Tml
             return new CharInfo { CharacterCount = c, TextWidth = c * fontSize };
         }
 
-#if !NET_4_6
+#if !NET_4_6 || true
         public delegate CharInfo GetCharacterCountCallbackType(Element e,string text,int startPos,int fontSize,int width);
 		public static GetCharacterCountCallbackType GetCharacterCountCallback = DefaultGetCharacterCountCallback;
 #else
@@ -47,6 +52,8 @@ namespace Tml
         /// </summary>
 		int lineStartIndex_;
 
+        public static Func<Element, ICumtomLayouter> GetCustomLayouter = DefaultGetCustomLayouter;
+
 		public Layouter(Element target){
 			Target = target;
 			currentX_ = 0;
@@ -60,6 +67,14 @@ namespace Tml
 		/// </summary>
 		public void Reflow()
 		{
+            // カウタムレイアウターがある場合は、そちらを使う
+            var customLayouter = GetCustomLayouter(Target);
+            if (customLayouter != null )
+            {
+                customLayouter.Reflow();
+                return;
+            }
+
 			Target.Fragments.Clear ();
 
 			foreach( var e in Target.Children)
@@ -73,8 +88,8 @@ namespace Tml
 			}
 
 			Target.LayoutedHeight = currentY_ + Target.Style.PaddingBottom;
-			if (Target.LayoutedHeight < Target.Height) {
-				Target.LayoutedHeight = Target.Height;
+			if (Target.LayoutedHeight < Target.Style.Height) {
+				Target.LayoutedHeight = Target.Style.Height;
 			}
 		}
 
@@ -101,7 +116,8 @@ namespace Tml
 		void reflowElement(Element e){
 			switch (e.LayoutType) {
 			case LayoutType.Block:
-				setMode (LayoutType.Block);
+            case LayoutType.Box:
+                    setMode(LayoutType.Block);
 				break;
 			case LayoutType.Inline:
 			case LayoutType.InlineBlock:
@@ -111,7 +127,10 @@ namespace Tml
 			}
 
 			switch (e.LayoutType) {
-			case LayoutType.Block:
+            case LayoutType.Box:
+                reflowBox(e);
+                break;
+            case LayoutType.Block:
 				reflowBlock (e);
 				break;
 			case LayoutType.Inline:
@@ -127,9 +146,27 @@ namespace Tml
 		}
 
         /// <summary>
+		/// ボックス要素を配置する
+        /// </summary>
+		void reflowBox(Element e)
+        {
+            // ブロックレイアウトの場合
+            // まず、幅を決定してから、高さを計算する
+            e.LayoutedWidth = e.Style.Width;
+            e.LayoutedHeight = e.Style.Height;
+
+            new Layouter(e).Reflow();
+
+            e.CalculateBlockHeight();
+            e.LayoutedY = currentY_ + Target.Style.PaddingTop + e.Style.Top;
+            e.LayoutedX = currentX_ + Target.Style.PaddingLeft + e.Style.Left;
+
+            Target.Fragments.Add(e);
+        }
+
+        /// <summary>
 		/// ブロック要素を配置する
         /// </summary>
-        /// <param name="e">E.</param>
 		void reflowBlock(Element e){
 			// ブロックレイアウトの場合
 			// まず、幅を決定してから、高さを計算する
@@ -148,7 +185,6 @@ namespace Tml
         /// <summary>
         /// インライン要素を配置する
         /// </summary>
-        /// <param name="e">E.</param>
 		void reflowInline(Element e){
 			for (int i = 0; i < e.Children.Count; i++) {
 				reflowElement (e.Children [i]);
@@ -156,7 +192,7 @@ namespace Tml
 		}
 
 		void reflowInlineBlock(Element e){
-			e.LayoutedWidth = e.Width;
+			e.LayoutedWidth = e.Style.Width;
 			new Layouter (e).Reflow();
 
 			e.CalculateBlockHeight ();
@@ -182,7 +218,8 @@ namespace Tml
 			var fontSize = text.Parent.ActualFontSize ();
 			while (true) {
 				var charInfo = GetCharacterCountCallback (text, str, cur, fontSize, Target.LayoutedInnerWidth - currentX_);
-				var n = charInfo.CharacterCount;
+                Logger.Log("" + (Target.LayoutedInnerWidth - currentX_) + " " + cur + " " + charInfo.CharacterCount + " " + charInfo.TextWidth);
+                var n = charInfo.CharacterCount;
 				if (n == 0) {
 					if (currentX_ == 0) {
 						// １文字も入らない幅の時の特別処理
@@ -255,6 +292,23 @@ namespace Tml
 			currentY_ += lineHeight;
 		}
 
-	}
+        /// <summary>
+        /// カスタムレイアウタを取得するデフォルトの関数
+        /// </summary>
+        /// <param name="e">対象のエェ面と</param>
+        public static ICumtomLayouter DefaultGetCustomLayouter(Element e)
+        {
+            if (e.Tag == "table")
+            {
+                return new TableLayouter(e);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+    }
+
 }
 

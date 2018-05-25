@@ -15,6 +15,10 @@ namespace Tml {
         public int PaddingRight;
         public int PaddingTop;
         public int PaddingBottom;
+        public int Left;
+        public int Top;
+        public int Width;
+        public int Height;
         public int FontSize;
         public float FontScale;
         public int LineHeight;
@@ -34,6 +38,10 @@ namespace Tml {
             if( over.PaddingRight != Nothing ) PaddingRight = over.PaddingRight;
             if( over.PaddingTop != Nothing ) PaddingTop = over.PaddingTop;
             if( over.PaddingBottom != Nothing ) PaddingBottom = over.PaddingBottom;
+            if( over.Left != Nothing ) Left = over.Left;
+            if( over.Top != Nothing ) Top = over.Top;
+            if( over.Width != Nothing ) Width = over.Width;
+            if( over.Height != Nothing ) Height = over.Height;
             if( over.FontSize != Nothing ) FontSize = over.FontSize;
             if( over.FontScale != NothingFloat ) FontScale = over.FontScale;
             if( over.LineHeight != Nothing ) LineHeight = over.LineHeight;
@@ -54,6 +62,10 @@ namespace Tml {
             if( PaddingRight == Nothing ) PaddingRight = 0;
             if( PaddingTop == Nothing ) PaddingTop = 0;
             if( PaddingBottom == Nothing ) PaddingBottom = 0;
+            if( Left == Nothing ) Left = 0;
+            if( Top == Nothing ) Top = 0;
+            if( Width == Nothing ) Width = 0;
+            if( Height == Nothing ) Height = 0;
             if( FontSize == Nothing ) FontSize = Inherit;
             if( FontScale == NothingFloat ) FontScale = 1.0f;
             if( LineHeight == Nothing ) LineHeight = Inherit;
@@ -91,6 +103,18 @@ namespace Tml {
                 break;
             case "padding-bottom":
                 PaddingBottom = int.Parse(value);
+                break;
+            case "left":
+                Left = int.Parse(value);
+                break;
+            case "top":
+                Top = int.Parse(value);
+                break;
+            case "width":
+                Width = int.Parse(value);
+                break;
+            case "height":
+                Height = int.Parse(value);
                 break;
             case "font-size":
                 FontSize = int.Parse(value);
@@ -135,6 +159,10 @@ namespace Tml {
                 PaddingRight = Nothing,
                 PaddingTop = Nothing,
                 PaddingBottom = Nothing,
+                Left = Nothing,
+                Top = Nothing,
+                Width = Nothing,
+                Height = Nothing,
                 FontSize = Nothing,
                 FontScale = NothingFloat,
                 LineHeight = Nothing,

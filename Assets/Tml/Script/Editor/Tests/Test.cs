@@ -136,7 +136,7 @@ namespace Tml
 
 		public Document parseAndLayout(string str, int width = 40){
 			var root = Parser.Default.Parse(str);
-			root.LayoutedWidth = root.Width = width;
+			root.LayoutedWidth = root.Style.Width = width;
 			var layouter = new Layouter (root);
 			layouter.Reflow();
 			return root;
@@ -191,9 +191,24 @@ namespace Tml
 			//Assert.AreEqual (60, e.Fragments [2].LayoutedHeight); // TODO: 文字サイズの子孫影響を整理する
 		}
 
-	}
+        [Test]
+        public void BoxTest()
+        {
+            var root = parseAndLayout("<box left='10' top='20' width='30' height='40' id='a'>a</box> <div id='b'>b</div>");
+            var a = root.FindById("a");
+            var b = root.FindById("b");
+            Assert.AreEqual(10, a.LayoutedX);
+            Assert.AreEqual(20, a.LayoutedY);
+            Assert.AreEqual(30, a.LayoutedWidth);
+            Assert.AreEqual(40, a.LayoutedHeight);
 
-	[TestFixture]
+            Assert.AreEqual(0, b.LayoutedX);
+            Assert.AreEqual(0, b.LayoutedY);
+            //Assert.AreEqual (60, e.Fragments [2].LayoutedHeight); // TODO: 文字サイズの子孫影響を整理する
+        }
+    }
+
+    [TestFixture]
 	public class StyleParserTest {
 
 		StyleParser parser;

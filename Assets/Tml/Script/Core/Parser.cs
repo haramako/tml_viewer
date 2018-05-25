@@ -68,9 +68,13 @@ namespace Tml
 			AddTag ("span", typeof(InlineElement));
 			AddTag ("img", typeof(Img));
 			AddTag ("a", typeof(A));
-		}
+            AddTag("box", typeof(BoxElement));
 
-		public void AddTag(string tag, Type type)
+            AddTag("table", typeof(BlockElement));
+            AddTag("listview", typeof(BlockElement));
+        }
+
+        public void AddTag(string tag, Type type)
 		{
 			var constructor = type.GetConstructor(new Type[0]);
 			TypeByTag.Add(tag, constructor);

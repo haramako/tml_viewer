@@ -127,7 +127,7 @@ namespace Tml.XmlPolyfill
 		}
 
 		bool isIdentChar(int c){
-			return (charType(c) & (CharType.Alphabet | CharType.Number | CharType.None)) != 0;
+			return (charType(c) & (CharType.Alphabet | CharType.Number | CharType.None | CharType.Separator )) != 0;
 		}
 
 		bool isQuoteChar(int c){

@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using RSG;
 using System;
+using UnityEngine.U2D;
 
 public class TmlView : MonoBehaviour {
 	public class EventInfo
@@ -17,6 +18,7 @@ public class TmlView : MonoBehaviour {
 
 	public Tml.Document Document;
 	public Sprite[] DefaultSprites;
+    public SpriteAtlas[] Atlases;
 
 	public EventInfo ActiveEvent { get; private set; }
 
@@ -47,15 +49,16 @@ public class TmlView : MonoBehaviour {
 		font.RequestCharactersInTexture (text, actualFontSize);
 		for (i = startPos; i < text.Length; i++) {
 			if (font.GetCharacterInfo (text [i], out ci, actualFontSize)) {
-				if (use + ci.advance >= rest ) {
-					return new Tml.Layouter.CharInfo{ CharacterCount = i - startPos, TextWidth = (int)use };
+                var advance = (float)ci.advance * fontSize / actualFontSize;
+                if (use + advance >= rest ) {
+					return new Tml.Layouter.CharInfo{ CharacterCount = i - startPos, TextWidth = Mathf.FloorToInt(use) };
 				}
-				use += (float)ci.advance * fontSize / actualFontSize;
+				use += advance;
 				prev = text [i];
 			}
 		}
 
-		return new Tml.Layouter.CharInfo{ CharacterCount = text.Length - startPos, TextWidth = (int)use };
+		return new Tml.Layouter.CharInfo{ CharacterCount = text.Length - startPos, TextWidth = Mathf.FloorToInt(use) };
 	}
 
 	public void Awake(){
@@ -88,8 +91,8 @@ public class TmlView : MonoBehaviour {
             Tml.Logger.LogException(ex);
             return null;
         }
-        doc.Width = doc.LayoutedWidth = (int)container.rect.width;
-        doc.Height = doc.LayoutedHeight = 0;
+        doc.GetEditableImmediateStyle().Width = doc.LayoutedWidth = (int)container.rect.width;
+        doc.GetEditableImmediateStyle().Height = doc.LayoutedHeight = 0;
 
         new Tml.Layouter(doc).Reflow();
 
@@ -107,18 +110,18 @@ public class TmlView : MonoBehaviour {
 		return doc;
     }
 
-    public Sprite GetSpriteAtlas(string spriteName){
-		for (int i = 0; i < DefaultSprites.Length; i++) {
-			if (DefaultSprites [i].name == spriteName) {
-				return DefaultSprites [i];
-			}
-		}
-		return null;
-	}
-
 	public IPromise<Sprite> GetSprite(string spriteName){
-		Sprite result;
-		if( sprites_.TryGetValue(spriteName, out result)){
+        for (int i = 0; i < Atlases.Length; i++)
+        {
+            var found = Atlases[i].GetSprite(spriteName);
+            if (found != null)
+            {
+                return Promise<Sprite>.Resolved(found);
+            }
+        }
+
+        Sprite result;
+        if ( sprites_.TryGetValue(spriteName, out result)){
 			return Promise<Sprite>.Resolved(result);
 		}else{
 			var url = new Uri (BaseUrl, spriteName).ToString ();

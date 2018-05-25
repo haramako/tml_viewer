@@ -216,6 +216,11 @@ style_field :int, 'padding-right'
 style_field :int, 'padding-top'
 style_field :int, 'padding-bottom'
 
+style_field :int, 'left'
+style_field :int, 'top'
+style_field :int, 'width'
+style_field :int, 'height'
+
 style_field :int, 'font-size', inherit: true
 style_field :float, 'font-scale', inherit: true, default: '1.0f'
 style_field :int, 'line-height', inherit: true

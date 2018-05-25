@@ -40,7 +40,14 @@ namespace Tml
 
 	public partial class Style
 	{
-		public const int Nothing = -9999;
+        /// <summary>
+        /// なにもないスタイル
+        /// 
+        /// 共有しているので、書き換えないように注意！
+        /// </summary>
+        public static Style SharedEmpty = Style.Empty();
+
+        public const int Nothing = -9999;
 		public const int Inherit = -9998;
 		public const float NothingFloat = -9999f;
 		public const float InheritFloat = -9998f;

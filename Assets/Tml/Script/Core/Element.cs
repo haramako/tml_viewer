@@ -23,11 +23,11 @@ namespace Tml
 
     public enum LayoutType
     {
-        Absolute,
+        Box,
         Block,
         Inline,
 		InlineBlock,
-		Text,
+        Text,
     }
 
     public enum PositionType
@@ -44,12 +44,9 @@ namespace Tml
         public string Id;
         public string Class;
 		public string[] Classes = new string[0];
-        public int X;
-        public int Y;
-        public int Width;
-        public int Height;
         public string Tips;
 		public string Href;
+        public int[] Cols;
 
         public Element Parent;
         public List<Element> Children = new List<Element>();
@@ -57,6 +54,7 @@ namespace Tml
 
 		public LayoutType LayoutType = LayoutType.Block;
 		public Style Style;
+        public Style ImmediateStyle { get { return (immediateStyle_ != null ? immediateStyle_ : Style.SharedEmpty); } }
 
         // レイアウト済み情報（内部で使用）
         public int LayoutedX;
@@ -68,6 +66,8 @@ namespace Tml
         public int LayoutedInnerWidth { get { return LayoutedWidth - Style.PaddingLeft - Style.PaddingRight; } }
         public int LayoutedInnerHeight { get { return LayoutedHeight - Style.PaddingTop - Style.PaddingBottom; } }
 
+
+        Style immediateStyle_;
 
         public Element()
         {
@@ -99,26 +99,18 @@ namespace Tml
 				case "class":
 					SetClass (value);
                     break;
-                case "x":
-                    X = int.Parse(value);
-                    break;
-                case "y":
-                    Y = int.Parse(value);
-                    break;
-                case "width":
-                    Width = int.Parse(value);
-                    break;
-                case "height":
-                    Height = int.Parse(value);
-                    break;
 				case "href":
                     Href = value;
                     break;
                 case "tips":
                     Tips = value;
                     break;
+                case "cols":
+                    Cols = value.Split(',').Select(e=>int.Parse(e)).ToArray();
+                    break;
                 default:
-                    Logger.Log("unknown attribute " + name + "=" + value);
+                    GetEditableImmediateStyle().SetField(name, value);
+                    //Logger.Log("unknown attribute " + name + "=" + value);
                     break;
             }
         }
@@ -128,12 +120,22 @@ namespace Tml
 			Classes = (Tag+" "+value).Trim ().Split (ClassSeprators, StringSplitOptions.RemoveEmptyEntries);
 		}
 
-		//==========================================================
-		// スタイル適用
-		//==========================================================
+        public Style GetEditableImmediateStyle()
+        {
+            if (immediateStyle_ == null)
+            {
+                immediateStyle_ = Style.Empty();
+            }
+            return immediateStyle_;
+        }
 
-		public void ApplyStyle(StyleSheet styleSheet){
-			Style = styleSheet.GetStyle (Classes);
+        //==========================================================
+        // スタイル適用
+        //==========================================================
+
+        public void ApplyStyle(StyleSheet styleSheet){
+            Style = styleSheet.GetStyle(Classes);
+            Style.Merge(ImmediateStyle);
 			for (int i = 0; i < Children.Count; i++) {
 				Children [i].ApplyStyle (styleSheet);
 			}
@@ -310,6 +312,14 @@ namespace Tml
 			}
 		}
 
+    }
+
+    public partial class BoxElement : Element
+    {
+        public BoxElement() : base()
+        {
+            LayoutType = LayoutType.Box;
+        }
     }
 
     public partial class BlockElement : Element
