@@ -218,7 +218,6 @@ namespace Tml
 			var fontSize = text.Parent.ActualFontSize ();
 			while (true) {
 				var charInfo = GetCharacterCountCallback (text, str, cur, fontSize, Target.LayoutedInnerWidth - currentX_);
-                Logger.Log("" + (Target.LayoutedInnerWidth - currentX_) + " " + cur + " " + charInfo.CharacterCount + " " + charInfo.TextWidth);
                 var n = charInfo.CharacterCount;
 				if (n == 0) {
 					if (currentX_ == 0) {

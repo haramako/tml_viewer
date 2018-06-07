@@ -103,7 +103,11 @@ namespace Tml {
 			view_ = p.View;
 
 			var go = new GameObject ("" + Tag + ":" + Id);
-			go.transform.SetParent (p.Container.transform, false);
+#if UNITY_EDITOR
+            var tmlElement = go.AddComponent<TmlElement>();
+            tmlElement.Element = this;
+#endif
+            go.transform.SetParent (p.Container.transform, false);
 			obj_ = go.GetComponent<RectTransform> ();
 			if (obj_ == null) {
 				obj_ = go.AddComponent<RectTransform> ();
