@@ -1,6 +1,8 @@
 # Unity 
 Library/
+Logs/
 Temp/
+UserSettings/
 obj/
 *.pidb
 *.csproj
